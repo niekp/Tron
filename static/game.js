@@ -93,7 +93,7 @@ socket.on('state', function(players, queue) {
 		ctx.fillStyle = p.color;
 		ctx.fillRect(p.x, p.y, unit, unit);
 		p.tail.forEach(function (m) {
-			ctx.fillRect(m.x+1, m.y+1, drawWidth, drawWidth);
+			ctx.fillRect(m.x+1, m.y+1, (unit-2), (unit-2));
 		});
 	}
 
