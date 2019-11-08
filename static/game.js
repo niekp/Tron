@@ -87,7 +87,6 @@ var readyButtonVisible = false;
 socket.on('state', function(players, queue) {
 	drawBackground();
 
-	var drawWidth = (unit-2)
 	for (var id in players) {
 		var p = players[id];
 
@@ -101,24 +100,24 @@ socket.on('state', function(players, queue) {
 	if (!socket.hasOwnProperty("id") || !socket.id) {
 		return;
 	}
+	var queued = !!queue[socket.id];
 
 	ctx.font = "14px Arial";
 
 	ctx.fillStyle = "black";
-	if (queue[socket.id]) {
+	if (queued)
 		ctx.fillStyle = queue[socket.id].color;
-	}
-	
 	ctx.fillRect(0, 0, canvas.width, 15);
 	ctx.fillStyle = "white";
-	ctx.fillText("Spelers: " + Object.keys(players).length, 10, 10);
+	
+	if (queued)
+		ctx.fillStyle = "black";
 
-	ctx.fillStyle = "white";
+	ctx.fillText("Spelers: " + Object.keys(players).length, 10, 10);
 	ctx.fillText("Wachtrij: " + Object.keys(queue).length, 80, 10);
 	
 
 	if (!Object.keys(players).length && Object.keys(queue).length >= 2 && queue[socket.id] && !queue[socket.id].ready) {
-		// Teken start knop
 		ctx.beginPath();
 		ctx.rect(startButton.x, startButton.y, startButton.width, startButton.height);
 		ctx.fillStyle = "green";
