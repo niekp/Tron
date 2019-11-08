@@ -8,7 +8,7 @@ var movement = {
 };
 
 function setMovement(keycode) {
-	if ([65, 87, 68, 83].indexOf(event.keyCode) < 0) {
+	if ([65, 87, 68, 83, 37, 38, 39, 40].indexOf(keycode) < 0) {
 		return;
 	}
 	
@@ -17,9 +17,10 @@ function setMovement(keycode) {
 	movement.down = false;
 	movement.left = false;
 	movement.right = false;
-	
-	switch (event.keyCode) {
+
+	switch (keycode) {
 		case 65: // A
+		case 37: // <
 			if (current.right) {
 				movement.right = true;
 				break;
@@ -27,6 +28,7 @@ function setMovement(keycode) {
 			movement.left = true;
 			break;
 		case 87: // W
+		case 38: // ^
 			if (current.bottom) {
 				movement.bottom = true;
 				break;
@@ -34,6 +36,7 @@ function setMovement(keycode) {
 			movement.up = true;
 			break;
 		case 68: // D
+		case 39: // >
 			if (current.left) {
 				movement.left = true;
 				break;
@@ -41,6 +44,7 @@ function setMovement(keycode) {
 			movement.right = true;
 			break;
 		case 83: // S
+		case 40: // v
 			if (current.up) {
 				movement.up = true;
 				break;

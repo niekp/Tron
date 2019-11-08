@@ -43,11 +43,7 @@ function kickOlder(seconds) {
 }
 
 setInterval(function() {
-  //if (g.started) {
-    //kickOlder(5)
-  //} else {
   kickOlder(5);
-  //}
   
   io.sockets.emit('state', g.players, g.queue);
 }, 1000 / 10);
