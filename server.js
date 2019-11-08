@@ -50,4 +50,4 @@ setInterval(function() {
   //}
   
   io.sockets.emit('state', g.players, g.queue);
-}, 1000 / 30);
+}, 1000 / 10);

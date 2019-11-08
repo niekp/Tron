@@ -1,6 +1,3 @@
-var gameWidth = 750;
-var gameHeight = 750;
-
 function player(x, y, color, unit) {
 	this.loadPlayer(x, y, color);
 	this.color = color || '#fff';

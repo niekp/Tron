@@ -58,11 +58,11 @@ var movementInterval = null;
 socket.emit('new player');
 movementInterval = setInterval(function() {
 	socket.emit('movement', movement);
-}, 1000 / 60);
+}, 1000 / 10);
 
 var canvas = document.getElementById('tron');
-canvas.width = 750;
-canvas.height = 750;
+canvas.width = 600;
+canvas.height = 600;
 
 var ctx = canvas.getContext('2d');
 const unit = 10;
@@ -78,7 +78,7 @@ function drawBackground() {
 
 function resetScreen() {
 	ctx.fillStyle = "black";
-	ctx.fillRect(0, 0, 750, 750);
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();	
 	readyButtonVisible = false;
 }
@@ -87,17 +87,16 @@ var readyButtonVisible = false;
 socket.on('state', function(players, queue) {
 	drawBackground();
 
+	var drawWidth = (unit-2)
 	for (var id in players) {
 		var p = players[id];
 
 		ctx.fillStyle = p.color;
 		ctx.fillRect(p.x, p.y, unit, unit);
 		p.tail.forEach(function (m) {
-			ctx.fillRect(m.x, m.y, unit, unit);
+			ctx.fillRect(m.x+1, m.y+1, drawWidth, drawWidth);
 		});
-		
 	}
-
 
 	if (!socket.hasOwnProperty("id") || !socket.id) {
 		return;
@@ -110,7 +109,7 @@ socket.on('state', function(players, queue) {
 		ctx.fillStyle = queue[socket.id].color;
 	}
 	
-	ctx.fillRect(0, 0, 750, 15);
+	ctx.fillRect(0, 0, canvas.width, 15);
 	ctx.fillStyle = "white";
 	ctx.fillText("Spelers: " + Object.keys(players).length, 10, 10);
 
@@ -149,7 +148,7 @@ function isInside(pos, rect){
 }
 
 var startButton = {
-    x: 300,
+    x: ((canvas.width/2)-75),
     y: 100,
     width: 150,
     height: 50

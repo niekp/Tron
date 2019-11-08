@@ -1,8 +1,8 @@
 var connection = require('./connection');
 var player = require('./player');
 
-var gameWidth = 750;
-var gameHeight = 750;
+var gameWidth = 600;
+var gameHeight = 600;
 const unit = 10;
 
 function game(io) {
@@ -36,7 +36,7 @@ function randomNumber(min, max) {
 }
 
 function randomStartPos() {
-    var number = randomNumber(50, 700);
+    var number = randomNumber(50, gameWidth-50);
     var remainder = number % unit;
     return number - remainder;
 }
