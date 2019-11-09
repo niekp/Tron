@@ -42,9 +42,38 @@ function randomStartPos() {
     return number - remainder;
 }
 
+game.prototype.getPlayersOrQueue = function() {
+    if (this.started) {
+        return this.players;
+    }
+    return this.queue;
+}
+
 var colors = ["#CB3301", "#FF0066", "#FF6666", "#FEFF99", "#FFFF67", "#CCFF66", "#99FE00", "#EC8EED", "#FF99CB", "#FE349A", "#CC99FE", "#6599FF", "#03CDFF", "#FFFFFF"];
-function randomColor() {
-    return colors[Math.floor(Math.random()*colors.length)];
+game.prototype.randomColor = function() {
+    var color = '';
+    var tries = 0;
+    while (!color) {
+        var x = colors[Math.floor(Math.random()*colors.length)];
+        tries++;
+        for (let id in this.getPlayersOrQueue()) {
+            if (this.players[id].color == x) {
+                x = '';
+                break;
+            }
+        }
+        
+        color = x;
+
+        if (tries > 20) {
+            break;
+        }
+    }
+
+    if (!color) {
+        color = colors[Math.floor(Math.random()*colors.length)];
+    }
+    return color;
 };
 
 game.prototype.deletePlayer = function(id) {
@@ -93,7 +122,7 @@ game.prototype.checkGameStatus = function() {
 }
 
 game.prototype.addPlayer = function(id) {
-    this.queue[id] = new player(randomStartPos(), randomStartPos(), randomColor(), unit);
+    this.queue[id] = new player(randomStartPos(), randomStartPos(), this.randomColor(), unit);
 }
 
 game.prototype.startGame = function() {
