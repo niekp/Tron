@@ -26,10 +26,12 @@ server.listen(5000, function() {
 var g = new game(io);
 
 function kickOlder(seconds) {
+  var kicked = false;
   var d = new Date().getTime();
   for (let key in g.players) {
     var p = g.players[key];
     if (d - p.lastUpdate > seconds * 1000) {
+      kicked = true;
       delete g.players[key];
     }
   }
@@ -37,18 +39,24 @@ function kickOlder(seconds) {
   for (let key in g.queue) {
     var p = g.queue[key];
     if (d - p.lastUpdate > seconds * 1000) {
+      kicked = true;
       delete g.queue[key];
     }
   }
+
+  return kicked;
 }
 
 setInterval(function() {
-  kickOlder(5);
+  var kicked = kickOlder(5);
   
   var startIn = 0;
   if (g.startTime) {
     startIn = Math.round((g.startTime - new Date().getTime())/1000);
   }
-  
+  if (kicked) {
+    io.sockets.emit('kicked player');
+  }
+
   io.sockets.emit('state', g.players, g.queue, startIn);
 }, 1000 / 10);

@@ -72,6 +72,8 @@ var ctx = canvas.getContext('2d');
 const unit = 10;
 
 function drawBackground() {
+	if (blockScreen)
+		return;
 	ctx.strokeStyle = '#001900';
 	for (let i = 0; i <= canvas.width / unit + 2; i += 1) {
 	  for (let j = 0; j <= canvas.height / unit + 2; j += 1) {
@@ -81,37 +83,38 @@ function drawBackground() {
 };
 
 function resetScreen() {
+	blockScreen = false;
+	readyButtonVisible = false;
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	drawBackground();	
-	readyButtonVisible = false;
 }
 
 socket.on('game started', function () {
 	resetScreen();
 });
 
+function setMessage(message, width) {
+	ctx.fillStyle = "black";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	
+	ctx.fillStyle = "white";
+	ctx.font = "30px Arial";
+	ctx.fillText(message, ((canvas.width/2)-width), 300);
+	blockScreen = true;
+}
+
+var blockScreen = false;
 socket.on('not enough players', function () {
+	setMessage("Not enough players, try again", 200);
+	setTimeout(resetScreen, 4000);
+});
+
+socket.on('kicked player', function () {
 	resetScreen();
 });
 
-var readyButtonVisible = false;
-socket.on('state', function(players, queue, startIn) {
-	drawBackground();
-
-	for (var id in players) {
-		var p = players[id];
-
-		ctx.fillStyle = p.color;
-		ctx.fillRect(p.x, p.y, unit, unit);
-		p.tail.forEach(function (m) {
-			ctx.fillRect(m.x+1, m.y+1, (unit-2), (unit-2));
-		});
-	}
-
-	if (!socket.hasOwnProperty("id") || !socket.id) {
-		return;
-	}
+function drawInfoBar() {
 	var queued = !!queue[socket.id];
 
 	ctx.font = "14px Arial";
@@ -129,16 +132,47 @@ socket.on('state', function(players, queue, startIn) {
 
 	ctx.fillText("Spelers: " + Object.keys(players).length, 10, 10);
 	ctx.fillText("Wachtrij: " + Object.keys(queue).length, 80, 10);
+}
+
+var readyButtonVisible = false;
+var notEnoughPlayers = false;
+socket.on('state', function(players, queue, startIn) {
+	drawBackground();
+
+	for (var id in players) {
+		var p = players[id];
+
+		ctx.fillStyle = p.color;
+		ctx.fillRect(p.x, p.y, unit, unit);
+		p.tail.forEach(function (m) {
+			ctx.fillRect(m.x+1, m.y+1, (unit-2), (unit-2));
+		});
+	}
+
+	if (!socket.hasOwnProperty("id") || !socket.id) {
+		return;
+	}
+	
 
 	if (!Object.keys(players).length && startIn) {
 		resetScreen();
 		ctx.fillStyle = "white";
 		ctx.font = "30px Arial";
 		ctx.fillText(startIn, ((canvas.width/2)-20), 300);
+
+		var p = queue[socket.id];
+		if (p != null && p.ready) {
+			ctx.fillStyle = p.color;
+			ctx.fillRect(p.x, p.y, unit, unit);
+		}
 	}
-	
 
 	if (!Object.keys(players).length && Object.keys(queue).length >= 2 && queue[socket.id] && !queue[socket.id].ready) {
+		if (notEnoughPlayers) {
+			notEnoughPlayers = false;
+			resetScreen();
+		}
+
 		ctx.beginPath();
 		ctx.rect(startButton.x, startButton.y, startButton.width, startButton.height);
 		ctx.fillStyle = "green";
@@ -150,10 +184,16 @@ socket.on('state', function(players, queue, startIn) {
 	} else if (readyButtonVisible) {
 		resetScreen();
 	}
+
+	if (!Object.keys(players).length && Object.keys(queue).length < 2 && !blockScreen) {
+		setTimeout(function () {
+			if (!Object.keys(players).length && Object.keys(queue).length < 2 && !blockScreen) {
+				setMessage("Not enough players online", 170);
+				notEnoughPlayers = true;
+			}
+		}, 50);
+	}
 });
-
-
-// Start knop
 
 function getMousePos(canvas, event) {
     var rect = canvas.getBoundingClientRect();

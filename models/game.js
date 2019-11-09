@@ -48,6 +48,18 @@ function randomColor() {
 };
 
 game.prototype.checkGameStatus = function() {
+    if (this.started) {
+        var playtime = (new Date().getTime() - this.startTime) / 1000;
+            // delete inactive players
+            for (let id in this.players) {
+            if (this.players[id].movement == null && playtime > 5) {
+                this.queue[id] = this.players[id];
+                this.queue[id].loadPlayer(randomStartPos(), randomStartPos());
+                delete this.players[id];
+            }
+        }
+    }
+
     if (Object.keys(this.players).length <= 1) {
         for (let id in this.players) {
             this.queue[id] = this.players[id];
@@ -57,12 +69,13 @@ game.prototype.checkGameStatus = function() {
 
         this.started = false;
         playableCells = getPlayableCells();
-    }
+    } 
 
     if (!this.started && this.readyCheck()) {
         this.startGame();
     }
 }
+
 game.prototype.addPlayer = function(id) {
     this.queue[id] = new player(randomStartPos(), randomStartPos(), randomColor(), unit);
 }
@@ -72,13 +85,12 @@ game.prototype.startGame = function() {
     for (let id in this.queue) {
         if (this.queue[id].ready) {
             this.players[id] = this.queue[id];
-            this.players[id].loadPlayer(randomStartPos(), randomStartPos());
+            this.players[id].loadPlayer(this.queue[id].x, this.queue[id].y);
             delete this.queue[id];
         }
     }
 
     this.started = true;
-    this.startTime = null
     this.io.sockets.emit('game started');
 }
 
@@ -87,7 +99,6 @@ game.prototype.readyCheck = function() {
         return false;
     }
     
-    let start = true;
     let amountReady = 0;
     for (let id in this.queue) {
         if (!this.queue[id].ready) {
@@ -96,18 +107,21 @@ game.prototype.readyCheck = function() {
             amountReady++;
         }
     }
+
     var startTimerDone = (this.startTime != null && new Date().getTime() >= this.startTime);
 
     if (startTimerDone && amountReady >= 2) {
         return true;
     } else if (startTimerDone) {
         // Timer done but not enough ready players
+        if ((new Date().getTime() - this.startTime) < 1000) {
+            this.io.sockets.emit('not enough players');
+        }
         this.startTime = null;
-        this.io.sockets.emit('not enough players');
+
         for (let id in this.queue) {
             this.queue[id].ready = false;
         }
-
     }
 
     return false;
@@ -124,7 +138,7 @@ game.prototype.socketListener = function(socket) {
         if (p != null) {
             p.ready = true;
 
-            if (self.startTime == null) {
+            if (self.startTime == null || self.startTime <= new Date().getTime()) {
                 self.startTime = new Date().getTime() + 10000;
             }
         }
@@ -160,6 +174,8 @@ game.prototype.socketListener = function(socket) {
 
             if (!playableCells.has(`${p.x}x${p.y}y`) && !p.dead) {
                 p.dead = true;
+                p.x = randomStartPos();
+                p.y = randomStartPos();
                 self.queue[socket.id] = p;
                 delete self.players[socket.id];
             }
@@ -170,8 +186,6 @@ game.prototype.socketListener = function(socket) {
             });
 
             playableCells.delete(`${p.x}x${p.y}y`);
-
-            self.checkGameStatus();
         } else {
             var p = self.queue[socket.id] || null;
             if (p != null) {
