@@ -32,7 +32,9 @@ function kickOlder(seconds) {
     var p = g.players[key];
     if (d - p.lastUpdate > seconds * 1000) {
       kicked = true;
+      g.deletePlayer(key);
       delete g.players[key];
+      delete g.queue[key];
     }
   }
 

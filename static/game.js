@@ -154,7 +154,7 @@ socket.on('state', function(players, queue, startIn) {
 	}
 	
 
-	if (!Object.keys(players).length && startIn) {
+	if (!Object.keys(players).length && startIn && !notEnoughPlayers) {
 		resetScreen();
 		ctx.fillStyle = "white";
 		ctx.font = "30px Arial";

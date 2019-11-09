@@ -47,15 +47,29 @@ function randomColor() {
     return colors[Math.floor(Math.random()*colors.length)];
 };
 
+game.prototype.deletePlayer = function(id) {
+    var p = this.players[id] || null;
+    if (!p) {
+        return;
+    }
+
+    // reactivate playable tiles
+    p.tail.forEach(function (m) {
+        playableCells.add(`${m.x}x${m.y}y`);
+    });
+
+    this.queue[id] = this.players[id];
+    this.queue[id].loadPlayer(randomStartPos(), randomStartPos());
+    delete this.players[id];
+}
+
 game.prototype.checkGameStatus = function() {
     if (this.started) {
         var playtime = (new Date().getTime() - this.startTime) / 1000;
             // delete inactive players
             for (let id in this.players) {
-            if (this.players[id].movement == null && playtime > 5) {
-                this.queue[id] = this.players[id];
-                this.queue[id].loadPlayer(randomStartPos(), randomStartPos());
-                delete this.players[id];
+            if (this.players[id].movement == null && playtime > 50) {
+                this.deletePlayer(id);
             }
         }
     }
