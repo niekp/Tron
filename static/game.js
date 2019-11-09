@@ -87,8 +87,16 @@ function resetScreen() {
 	readyButtonVisible = false;
 }
 
+socket.on('game started', function () {
+	resetScreen();
+});
+
+socket.on('not enough players', function () {
+	resetScreen();
+});
+
 var readyButtonVisible = false;
-socket.on('state', function(players, queue) {
+socket.on('state', function(players, queue, startIn) {
 	drawBackground();
 
 	for (var id in players) {
@@ -109,16 +117,25 @@ socket.on('state', function(players, queue) {
 	ctx.font = "14px Arial";
 
 	ctx.fillStyle = "black";
-	if (queued)
+	if (queued) {
 		ctx.fillStyle = queue[socket.id].color;
+	}
 	ctx.fillRect(0, 0, canvas.width, 15);
 	ctx.fillStyle = "white";
 	
-	if (queued)
+	if (queued) {
 		ctx.fillStyle = "black";
+	}
 
 	ctx.fillText("Spelers: " + Object.keys(players).length, 10, 10);
 	ctx.fillText("Wachtrij: " + Object.keys(queue).length, 80, 10);
+
+	if (!Object.keys(players).length && startIn) {
+		resetScreen();
+		ctx.fillStyle = "white";
+		ctx.font = "30px Arial";
+		ctx.fillText(startIn, ((canvas.width/2)-20), 300);
+	}
 	
 
 	if (!Object.keys(players).length && Object.keys(queue).length >= 2 && queue[socket.id] && !queue[socket.id].ready) {

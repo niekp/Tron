@@ -10,6 +10,7 @@ function game(io) {
     this.players = {}
     this.started = false;
     this.io = io;
+    this.startTime = null;
 
     var self = this;
 
@@ -69,12 +70,16 @@ game.prototype.addPlayer = function(id) {
 game.prototype.startGame = function() {
     this.players = {};
     for (let id in this.queue) {
-        this.players[id] = this.queue[id];
-        this.players[id].loadPlayer(randomStartPos(), randomStartPos());
-        delete this.queue[id];
+        if (this.queue[id].ready) {
+            this.players[id] = this.queue[id];
+            this.players[id].loadPlayer(randomStartPos(), randomStartPos());
+            delete this.queue[id];
+        }
     }
 
     this.started = true;
+    this.startTime = null
+    this.io.sockets.emit('game started');
 }
 
 game.prototype.readyCheck = function() {
@@ -83,15 +88,26 @@ game.prototype.readyCheck = function() {
     }
     
     let start = true;
+    let amountReady = 0;
     for (let id in this.queue) {
         if (!this.queue[id].ready) {
             start = false;
-            return;
+        } else {
+            amountReady++;
         }
     }
+    var startTimerDone = (this.startTime != null && new Date().getTime() >= this.startTime);
 
-    if (start && Object.keys(this.queue).length >= 2) {
+    if (startTimerDone && amountReady >= 2) {
         return true;
+    } else if (startTimerDone) {
+        // Timer done but not enough ready players
+        this.startTime = null;
+        this.io.sockets.emit('not enough players');
+        for (let id in this.queue) {
+            this.queue[id].ready = false;
+        }
+
     }
 
     return false;
@@ -107,6 +123,10 @@ game.prototype.socketListener = function(socket) {
         var p = self.queue[socket.id] || null;
         if (p != null) {
             p.ready = true;
+
+            if (self.startTime == null) {
+                self.startTime = new Date().getTime() + 10000;
+            }
         }
 
         self.checkGameStatus();

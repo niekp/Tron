@@ -45,5 +45,10 @@ function kickOlder(seconds) {
 setInterval(function() {
   kickOlder(5);
   
-  io.sockets.emit('state', g.players, g.queue);
+  var startIn = 0;
+  if (g.startTime) {
+    startIn = Math.round((g.startTime - new Date().getTime())/1000);
+  }
+  
+  io.sockets.emit('state', g.players, g.queue, startIn);
 }, 1000 / 10);
