@@ -68,7 +68,7 @@ game.prototype.checkGameStatus = function() {
         var playtime = (new Date().getTime() - this.startTime) / 1000;
             // delete inactive players
             for (let id in this.players) {
-            if (this.players[id].movement == null && playtime > 50) {
+            if (this.players[id].movement == null && playtime > 5) {
                 this.deletePlayer(id);
             }
         }
