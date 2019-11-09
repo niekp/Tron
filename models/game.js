@@ -76,6 +76,8 @@ game.prototype.checkGameStatus = function() {
 
     if (Object.keys(this.players).length <= 1) {
         for (let id in this.players) {
+            this.io.sockets.emit('winner', this.players[id]);
+
             this.queue[id] = this.players[id];
             this.queue[id].loadPlayer(randomStartPos(), randomStartPos());
             delete this.players[id];
@@ -192,6 +194,8 @@ game.prototype.socketListener = function(socket) {
                 p.y = randomStartPos();
                 self.queue[socket.id] = p;
                 delete self.players[socket.id];
+            } else {
+                p.score++;
             }
 
             p.tail.push({

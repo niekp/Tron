@@ -12,6 +12,7 @@ player.prototype.loadPlayer = function (x, y) {
 	this.movement = null;
 	this.ready = false;
 	this.tail = [];
+	this.score = 0;
 }
 
 module.exports = player;

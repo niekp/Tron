@@ -94,6 +94,12 @@ socket.on('game started', function () {
 	resetScreen();
 });
 
+socket.on('winner', function (player) {
+	ctx.fillStyle = player.color;
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	setTimeout(resetScreen, 3000);
+});
+
 function setMessage(message, width) {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -152,7 +158,6 @@ socket.on('state', function(players, queue, startIn) {
 	if (!socket.hasOwnProperty("id") || !socket.id) {
 		return;
 	}
-	
 
 	if (!Object.keys(players).length && startIn && !notEnoughPlayers) {
 		resetScreen();
@@ -193,6 +198,9 @@ socket.on('state', function(players, queue, startIn) {
 			}
 		}, 50);
 	}
+
+	if (players[socket.id])
+		document.getElementById('score').innerHTML = players[socket.id].score;
 });
 
 function getMousePos(canvas, event) {

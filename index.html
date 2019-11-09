@@ -12,11 +12,18 @@
 				outline: 1px solid #333;
 				outline-offset: 5px;
 			}
+
+			#scoreboard {
+				color: white;
+			}
 		</style>
 		<script src="/socket.io/socket.io.js"></script>
 	</head>
 	<body>
 		<canvas id="tron" width="600" height="600"></canvas>
+		<div id="scoreboard">Score: 
+			<span id="score">0</span>
+		</div>
 	</body>
 	<script src="/static/game.js"></script>
 </html>
