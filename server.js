@@ -28,12 +28,19 @@ var g = new game(io);
 function kickOlder(seconds) {
   var kicked = false;
   var d = new Date().getTime();
-  for (let key in g.getPlayersOrQueue()) {
+  for (let key in g.players) {
     var p = g.players[key];
     if (d - p.lastUpdate > seconds * 1000) {
       kicked = true;
       g.deletePlayer(key);
-      delete g.players[key];
+      delete g.queue[key];
+    }
+  }
+  
+  for (let key in g.queue) {
+    var p = g.queue[key];
+    if (d - p.lastUpdate > seconds * 1000) {
+      kicked = true;
       delete g.queue[key];
     }
   }

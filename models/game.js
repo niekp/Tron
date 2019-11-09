@@ -42,13 +42,6 @@ function randomStartPos() {
     return number - remainder;
 }
 
-game.prototype.getPlayersOrQueue = function() {
-    if (this.started) {
-        return this.players;
-    }
-    return this.queue;
-}
-
 var colors = ["#CB3301", "#FF0066", "#FF6666", "#FEFF99", "#FFFF67", "#CCFF66", "#99FE00", "#EC8EED", "#FF99CB", "#FE349A", "#CC99FE", "#6599FF", "#03CDFF", "#FFFFFF"];
 game.prototype.randomColor = function() {
     var color = '';
@@ -56,8 +49,14 @@ game.prototype.randomColor = function() {
     while (!color) {
         var x = colors[Math.floor(Math.random()*colors.length)];
         tries++;
-        for (let id in this.getPlayersOrQueue()) {
+        for (let id in this.players) {
             if (this.players[id].color == x) {
+                x = '';
+                break;
+            }
+        }
+        for (let id in this.queue) {
+            if (this.queue[id].color == x) {
                 x = '';
                 break;
             }
